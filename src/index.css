@@ -1,0 +1,656 @@
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@500;700&display=swap');
+
+/* --- UNIVERSAL LAYOUT SAFETY NET --- */
+
+/* 1. Forces padding to sit INSIDE the width, preventing blowouts */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* 2. Protects the Sidebar from ever being squished by Flexbox */
+.app-layout > :first-child {
+  flex-shrink: 0;
+}
+
+/* 3. Prevents the main content from demanding more than 100% space */
+.main-content {
+  flex: 1;
+  min-width: 0; 
+}
+
+:root {
+  /* Colors */
+  --bg-main: #f8f8fb;
+  --bg-card: #ffffff;
+  --text-main: #0c0e16;
+  --text-muted: #888eb0;
+  
+  --primary: #7c5dfa;
+  --primary-hover: #9277ff;
+  
+  --danger: #ec5757;
+  --danger-hover: #ff9797;
+  
+  --status-paid: #33d69f;
+  --status-paid-bg: rgba(51, 214, 159, 0.06);
+  --status-pending: #ff8f00;
+  --status-pending-bg: rgba(255, 143, 0, 0.06);
+  --status-draft: #373b53;
+  --status-draft-bg: rgba(55, 59, 83, 0.06);
+
+  --sidebar-bg: #373b53;
+}
+
+[data-theme="dark"] {
+  --bg-main: #141625;
+  --bg-card: #1e2139;
+  --text-main: #ffffff;
+  --text-muted: #dfe3fa;
+  --status-draft: #dfe3fa;
+  --status-draft-bg: rgba(223, 227, 250, 0.06);
+  --sidebar-bg: #1e2139;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'League Spartan', sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* --- LAYOUT RULES --- */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background-color: var(--sidebar-bg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 72px; 
+  z-index: 90;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .app-layout { flex-direction: row; }
+  .sidebar {
+    flex-direction: column;
+    width: 103px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    border-radius: 0 20px 20px 0;
+  }
+  .main-content {
+    margin-left: 103px;
+    padding: 4.5rem 3rem;
+  }
+}
+
+/* --- DASHBOARD HEADER STYLES --- */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4rem;
+}
+
+.header-title h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.25rem; }
+.header-title p { color: var(--text-muted); font-size: 0.875rem; }
+
+.header-actions { display: flex; align-items: center; gap: 1.5rem; }
+
+.btn-new-invoice {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 999px;
+  padding: 0.5rem 1rem 0.5rem 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-new-invoice:hover { background-color: var(--primary-hover); }
+
+.icon-plus-wrapper {
+  background-color: white;
+  color: var(--primary);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+}
+
+/* --- INVOICE CARD & STATUS BADGES --- */
+.invoice-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Mobile: 2 columns */
+  align-items: center;
+  row-gap: 0.5rem;
+  background-color: var(--bg-card);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  box-shadow: 0 10px 10px -10px rgba(72, 84, 159, 0.1);
+  border: 1px solid transparent;
+  transition: border 0.3s ease, transform 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+
+.invoice-card:hover {
+  border: 1px solid var(--primary);
+}
+
+/* Mobile Grid Positioning */
+.invoice-id { grid-column: 1; grid-row: 1; font-weight: 700; color: var(--text-main); }
+.invoice-id span { color: var(--text-muted); }
+.invoice-name { grid-column: 2; grid-row: 1; text-align: right; color: var(--text-muted); font-size: 0.875rem; }
+.invoice-date { grid-column: 1; grid-row: 2; color: var(--text-muted); font-size: 0.875rem; margin-top: 1rem; }
+.invoice-total { grid-column: 1; grid-row: 3; font-weight: 700; font-size: 1.25rem; color: var(--text-main); }
+.status-badge { grid-column: 2; grid-row: 2 / span 2; justify-self: end; align-self: end; }
+.invoice-arrow { display: none; } /* Hide arrow on mobile */
+
+/* Desktop Grid Positioning */
+@media (min-width: 768px) {
+  .invoice-card {
+    /* Tablet/Desktop: 6 specific columns */
+    grid-template-columns: 80px 120px 1fr 100px 120px 20px;
+    row-gap: 0;
+    padding: 1rem 2rem;
+  }
+  
+  .invoice-id { grid-column: 1; grid-row: 1; }
+  .invoice-date { grid-column: 2; grid-row: 1; margin-top: 0; }
+  .invoice-name { grid-column: 3; grid-row: 1; text-align: left; }
+  .invoice-total { grid-column: 4; grid-row: 1; text-align: right; padding-right: 2rem; }
+  .status-badge { grid-column: 5; grid-row: 1; justify-self: center; align-self: center; }
+  
+  .invoice-arrow { 
+    grid-column: 6; 
+    grid-row: 1; 
+    display: block; 
+    justify-self: end; 
+    color: var(--primary); 
+    font-weight: bold; 
+  }
+}
+
+/* Status Badges */
+.status-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 104px;
+  padding: 0.75rem 0;
+  border-radius: 6px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.status-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+.status-badge.paid { background-color: var(--status-paid-bg); color: var(--status-paid); }
+.status-badge.paid .status-dot { background-color: var(--status-paid); }
+
+.status-badge.pending { background-color: var(--status-pending-bg); color: var(--status-pending); }
+.status-badge.pending .status-dot { background-color: var(--status-pending); }
+
+.status-badge.draft { background-color: var(--status-draft-bg); color: var(--status-draft); }
+.status-badge.draft .status-dot { background-color: var(--status-draft); }
+
+/* --- SIDEBAR INTERNALS --- */
+.sidebar-logo {
+  background-color: var(--primary);
+  height: 72px;
+  width: 72px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 0 20px 20px 0;
+}
+
+.sidebar-controls {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding-right: 1.5rem;
+  height: 100%;
+}
+
+.sidebar-divider {
+  width: 1px;
+  height: 100%;
+  background-color: #494e6e;
+}
+
+/* On Desktop, we change the sizes and flip the layout of the controls */
+@media (min-width: 1024px) {
+  .sidebar-logo {
+    width: 103px;
+    height: 103px;
+  }
+  
+  .sidebar-controls {
+    flex-direction: column; /* Stacks the moon icon above the avatar */
+    padding-right: 0;
+    padding-bottom: 1.5rem;
+    height: auto;
+    width: 100%;
+  }
+
+  .sidebar-divider {
+    width: 100%;
+    height: 1px;
+    margin: 1.5rem 0; /* Adds spacing around the line */
+  }
+}
+
+/* --- CUSTOM STATUS FILTER DROPDOWN --- */
+.filter-container {
+  position: relative; /* Acts as the anchor for the absolute dropdown */
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+}
+
+.filter-dropdown {
+  position: absolute;
+  top: 40px; /* Pushes it below the text */
+  left: -20px;
+  background-color: var(--bg-card);
+  box-shadow: 0 10px 20px rgba(72, 84, 159, 0.25);
+  border-radius: 8px;
+  padding: 1.5rem;
+  width: 192px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  z-index: 100; /* Ensures it sits on top of everything else */
+}
+
+/* Custom Checkbox Styling */
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+.filter-option input[type="checkbox"] {
+  /* Hides the default ugly browser checkbox */
+  appearance: none; 
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background-color: var(--status-draft-bg); /* Use the subtle grey from our variables */
+  border-radius: 2px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.filter-option input[type="checkbox"]:checked {
+  background-color: var(--primary);
+}
+
+/* The white checkmark icon when selected */
+.filter-option input[type="checkbox"]:checked::after {
+  content: '✓';
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.filter-option label {
+  font-weight: 700;
+  text-transform: capitalize;
+  cursor: pointer;
+}
+
+/* Hide extra text on Mobile, reveal it on Tablet/Desktop */
+.desktop-only { 
+  display: none; 
+}
+
+@media (min-width: 768px) {
+  .desktop-only { 
+    display: inline; 
+  }
+}
+
+/* --- INVOICE DETAILS PAPER BILL --- */
+:root {
+  --bg-items: #f9fafe;
+  --bg-total: #373b53;
+}
+[data-theme="dark"] {
+  --bg-items: #252945;
+  --bg-total: #0c0e16;
+}
+
+.paper-bill {
+  background-color: var(--bg-card);
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 10px 10px -10px rgba(72, 84, 159, 0.1);
+  margin-top: 1.5rem;
+}
+
+.bill-label, .bill-sender-address, .bill-client-address {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.bill-value { font-weight: 700; color: var(--text-main); font-size: 0.9375rem; margin-bottom: 0.5rem; }
+
+.bill-top { display: flex; flex-direction: column; gap: 2rem; margin-bottom: 2rem; }
+.bill-middle { display: grid; grid-template-columns: 1fr 1fr; row-gap: 2rem; margin-bottom: 2.5rem; }
+.bill-dates { display: flex; flex-direction: column; gap: 2rem; }
+.bill-email { grid-column: 1 / -1; } 
+
+.bill-items-wrapper { background-color: var(--bg-items); border-radius: 8px 8px 0 0; padding: 1.5rem; }
+.bill-items-header { display: none; } 
+.bill-item-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.bill-item-row:last-child { margin-bottom: 0; }
+.desktop-item-column { display: none; } 
+
+.bill-total-footer {
+  background-color: var(--bg-total); color: white; padding: 1.5rem;
+  border-radius: 0 0 8px 8px; display: flex; justify-content: space-between; align-items: center;
+}
+
+/* --- ACTION BUTTONS & MOBILE BAR --- */
+.action-btn {
+  padding: 1rem 1.5rem; border-radius: 24px; border: none; font-weight: bold; cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+.action-btn:hover { opacity: 0.8; }
+.btn-edit { background-color: var(--status-draft-bg); color: var(--text-muted); }
+.btn-delete { background-color: var(--danger); color: white; }
+.btn-paid { background-color: var(--primary); color: white; }
+
+/* Mobile Fixed Footer Bar */
+.detail-actions {
+  position: fixed;
+  bottom: 0; left: 0; width: 100%;
+  background-color: var(--bg-card);
+  display: flex; justify-content: center; gap: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 -10px 10px -10px rgba(72, 84, 159, 0.1);
+  z-index: 10;
+}
+
+/* Desktop Fixes */
+@media (min-width: 768px) {
+  .paper-bill { padding: 3rem; }
+  .bill-top { flex-direction: row; justify-content: space-between; }
+  .bill-sender-address { text-align: right; }
+  .bill-middle { grid-template-columns: 1fr 1fr 1fr; }
+  .bill-email { grid-column: auto; } 
+
+  .bill-items-wrapper { padding: 2rem; }
+  .mobile-item-details { display: none; } 
+  .desktop-item-column { display: block; } 
+  
+  .bill-items-header {
+    display: grid; grid-template-columns: 3fr 1fr 1fr 1fr;
+    color: var(--text-muted); font-size: 0.75rem; margin-bottom: 2rem;
+  }
+
+  .bill-item-row {
+    display: grid; grid-template-columns: 3fr 1fr 1fr 1fr;
+    margin-bottom: 2rem;
+  }
+
+  /* Explicit Alignment Classes to fix the grid squish! */
+  .col-qty { text-align: center; }
+  .col-price { text-align: right; }
+  .col-total { text-align: right; }
+
+  /* Detach action bar from bottom and put it back in the header */
+  .detail-actions {
+    position: static; width: auto; padding: 0; box-shadow: none; justify-content: flex-end;
+  }
+}
+
+/* --- MOBILE SPACER FOR FIXED ACTION BAR --- */
+.invoice-detail-container {
+  /* Creates empty space at the bottom so the user can scroll past the fixed bar */
+  padding-bottom: 8rem; 
+}
+
+@media (min-width: 768px) {
+  .invoice-detail-container {
+    /* Reset on desktop because the buttons move back up to the header */
+    padding-bottom: 0; 
+  }
+}
+
+/* --- CONFIRM DELETION MODAL --- */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* The dark dimming effect */
+  display: flex; justify-content: center; align-items: center;
+  z-index: 9999; /* Ensures it sits on top of everything, including the sidebar */
+  padding: 1.5rem;
+}
+
+.modal-card {
+  background-color: var(--bg-card);
+  padding: 2.5rem 2rem;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 480px; /* Restricts the width on Desktop */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.modal-card h2 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-main); }
+.modal-card p { color: var(--text-muted); font-size: 0.875rem; line-height: 1.5; margin-bottom: 1.5rem; }
+
+.modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
+
+/* --- GLOBAL SLIDE-OUT FORM DRAWER --- */
+.form-overlay {
+  position: fixed;
+  top: 72px; /* Sits exactly below the mobile Topbar */
+  left: 0; width: 100%; height: calc(100vh - 72px);
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 40; /* Below the sidebar, but above the dashboard */
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.form-overlay.open {
+  opacity: 1; pointer-events: auto;
+}
+
+.form-drawer {
+  position: fixed;
+  top: 72px; left: 0; width: 100%; height: calc(100vh - 72px);
+  background-color: var(--bg-main);
+  z-index: 50;
+  padding: 2rem 1.5rem;
+  overflow-y: auto;
+  transform: translateX(-100%); /* Hides it completely off-screen to the left */
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth slide animation */
+}
+
+.form-drawer.open {
+  transform: translateX(0); /* Slides it into view! */
+}
+
+@media (min-width: 1024px) {
+  .form-overlay { top: 0; height: 100vh; }
+  .form-drawer {
+    top: 0; 
+    left: 103px; /* Starts exactly where the Desktop Sidebar ends */
+    width: 719px; 
+    height: 100vh; 
+    padding: 3.5rem;
+    border-radius: 0 20px 20px 0;
+  }
+}
+
+/* --- INVOICE FORM INPUTS --- */
+.form-section-title {
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  margin-bottom: 1.5rem;
+  margin-top: 2rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+}
+
+.input-group label {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  margin-bottom: 0.5rem;
+}
+
+.input-field {
+  width: 100%; /* Forces the input to shrink/grow with the grid */
+  box-sizing: border-box; /* Stops padding from adding extra hidden width */
+  background-color: var(--bg-card);
+  border: 1px solid var(--status-draft-bg);
+  border-radius: 4px;
+  padding: 1rem;
+  color: var(--text-main);
+  font-family: inherit;
+  font-weight: 700;
+  outline: none;
+  transition: border 0.2s ease;
+}
+
+.input-field:focus { border-color: var(--primary); }
+.input-field.error { border-color: var(--danger); } /* Turns red if validation fails! */
+
+.error-msg {
+  color: var(--danger);
+  font-size: 0.625rem;
+  margin-top: 0.25rem;
+  font-weight: 600;
+}
+
+/* Grids for side-by-side inputs */
+.form-grid-3 {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+}
+.form-grid-2 {
+  display: grid; grid-template-columns: 1fr; gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .form-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .form-grid-2 { grid-template-columns: 1fr 1fr; }
+}
+
+/* --- DYNAMIC ITEM LIST --- */
+.item-list-header {
+  font-size: 1.125rem;
+  color: #777f98;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Mobile Default: 2 Rows per Item */
+.item-row {
+  display: grid;
+  grid-template-columns: 64px 1fr 1fr auto; /* Qty, Price, Total, Delete Icon */
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.item-name-full {
+  grid-column: 1 / -1; /* Spans the entire width on mobile */
+  margin-bottom: -0.5rem;
+}
+
+.item-total-text {
+  color: var(--text-muted);
+  font-weight: 700;
+  padding-top: 1.5rem; /* Aligns with the inputs */
+}
+
+/* Add / Delete Buttons */
+.btn-add-item {
+  width: 100%; padding: 1rem; border-radius: 24px; border: none; font-weight: bold; cursor: pointer;
+  background-color: var(--status-draft-bg); color: var(--text-muted); margin-top: 1rem; transition: opacity 0.2s;
+}
+.btn-add-item:hover { opacity: 0.8; }
+
+.btn-delete-item { background: none; border: none; cursor: pointer; color: #888eb0; padding-top: 1.25rem; font-size: 1.25rem; transition: color 0.2s; }
+.btn-delete-item:hover { color: var(--danger); }
+
+/* Desktop Fix: 1 Row per Item */
+@media (min-width: 768px) {
+  .item-row {
+    grid-template-columns: 2fr 80px 100px 1fr auto; /* Name, Qty, Price, Total, Delete */
+    margin-bottom: 1rem;
+  }
+  .item-name-full {
+    grid-column: auto; /* Resets the mobile full-width span */
+    margin-bottom: 0;
+  }
+}
+
+/* --- BUG FIXES & SAFETY NETS --- */
+
+/* Prevents the entire website from ever side-scrolling */
+body {
+  overflow-x: hidden; 
+}
+
+/* Let the status container take full width on mobile... */
+.status-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* ...but shrink back down on Desktop so it shares the row with the buttons! */
+@media (min-width: 768px) {
+  .status-container {
+    width: auto;
+    justify-content: flex-start;
+    gap: 1rem;
+  }
+}
