@@ -232,6 +232,8 @@ body {
   justify-content: center;
   align-items: center;
   border-radius: 0 20px 20px 0;
+  overflow: hidden; /* <-- ADD THIS */
+  padding: 0;       /* <-- ADD THIS */
 }
 
 .sidebar-controls {

@@ -1,22 +1,25 @@
 import { useContext } from 'react';
 import { AppContext } from '../context/AppContext';
+import logoImg from '../assets/image/logo.png.png'
 
 export default function Sidebar() {
   const { theme, toggleTheme } = useContext(AppContext);
 
   return (
     <aside className="sidebar">
-      
-      {/* LOGO AREA */}
-      <div className="sidebar-logo">
-        <h2 style={{ color: 'white' }}>Logo</h2>
+      {/* 2. Replace the "Logo" text with your image */}
+      <div className="sidebar-logo" style={{ padding: 0, overflow: 'hidden' }}>
+        <img 
+          src={logoImg} 
+          alt="Invoice App Logo" 
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+        />
       </div>
 
-      {/* BOTTOM / RIGHT AREA */}
       <div className="sidebar-controls">
-        
+        {/* Theme Toggle Button */}
         <button 
-          onClick={toggleTheme}
+          onClick={toggleTheme} 
           style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.25rem' }}
           aria-label="Toggle Dark Mode"
         >
@@ -25,13 +28,15 @@ export default function Sidebar() {
 
         <div className="sidebar-divider"></div>
 
-        <img 
-          src="/image-avatar.jpg" 
-          alt="User Avatar"
-          style={{ width: '32px', height: '32px', borderRadius: '50%' }}
-        />
+        {/* 3. Fix the broken user avatar with a placeholder! */}
+        <div className="user-avatar" style={{ cursor: 'pointer' }}>
+          <img 
+            src="https://i.pravatar.cc/150?img=11" 
+            alt="User Avatar" 
+            style={{ width: '32px', height: '32px', borderRadius: '50%' }}
+          />
+        </div>
       </div>
-
     </aside>
   );
 }

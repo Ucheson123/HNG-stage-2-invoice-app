@@ -7,16 +7,20 @@ To run this project locally on your machine, follow these steps:
 
 Clone the repository:
 
-git clone [Insert your repo link here]
+git clone 'https://github.com/Ucheson123/HNG-stage-2-invoice-app'
+
 Navigate into the project directory:
 
-cd [Insert your folder name]
+cd HNG-stage-2-invoice-app
+
 Install the dependencies:
 
 npm install
+
 Start the development server:
 
 npm run dev
+
 Open your browser and navigate to the localhost port provided in your terminal (usually http://localhost:5173).
 
 **Architecture Explanation**
